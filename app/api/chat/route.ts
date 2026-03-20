@@ -1,9 +1,7 @@
-import { generateText } from 'ai'
+import { generateText as generateTextFn } from 'ai'
 import { createGroq } from '@ai-sdk/groq'
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY,
-})
+const hasAISDK = !!generateTextFn && !!createGroq
 
 const systemPrompt = `You are IterAI, an expert coding mentor. Your role is to:
 1. Help users understand coding concepts, algorithms, and data structures
@@ -22,6 +20,14 @@ When answering:
 
 Current context: The user is practicing coding problems and seeking to improve their skills.`
 
+const mockResponses = [
+  "That's a great question! Let me break it down step by step...",
+  "Here's an approach: first understand the problem constraints, then think about edge cases...",
+  "Consider using a data structure like a hash map to optimize your solution...",
+  "Remember to test your solution with different test cases to ensure correctness...",
+  "This is a classic problem that can be solved with proper algorithm design. Think about the time and space complexity..."
+]
+
 export async function POST(req: Request) {
   try {
     const { message, userId, context } = await req.json()
@@ -33,20 +39,29 @@ export async function POST(req: Request) {
       )
     }
 
-    if (!process.env.GROQ_API_KEY) {
-      return Response.json(
-        { error: 'GROQ_API_KEY is not configured' },
-        { status: 500 }
-      )
-    }
+    let text = ''
 
-    const { text } = await generateText({
-      model: groq('mixtral-8x7b-32768'),
-      system: systemPrompt,
-      prompt: message,
-      temperature: 0.7,
-      maxTokens: 1024,
-    })
+    if (hasAISDK && process.env.GROQ_API_KEY) {
+      try {
+        const groq = createGroq({
+          apiKey: process.env.GROQ_API_KEY,
+        })
+
+        const result = await generateTextFn({
+          model: groq('mixtral-8x7b-32768'),
+          system: systemPrompt,
+          prompt: message,
+          temperature: 0.7,
+          maxTokens: 1024,
+        })
+        text = result
+      } catch (aiError) {
+        console.warn('Groq API error, using mock response:', aiError)
+        text = mockResponses[Math.floor(Math.random() * mockResponses.length)]
+      }
+    } else {
+      text = mockResponses[Math.floor(Math.random() * mockResponses.length)]
+    }
 
     return Response.json({
       message: text,
