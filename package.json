@@ -9,8 +9,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "ai": "^6.0.0",
-    "@ai-sdk/groq": "^0.0.16",
+    "ai": "^5.18.0",
+    "@ai-sdk/groq": "^0.0.14",
     "@hookform/resolvers": "^3.9.1",
     "@vercel/analytics": "1.6.1",
     "@radix-ui/react-accordion": "1.2.12",

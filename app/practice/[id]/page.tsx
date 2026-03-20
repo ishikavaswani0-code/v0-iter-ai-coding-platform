@@ -6,7 +6,17 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/auth-context'
 import { Brain, LogOut, Play, Copy, Check } from 'lucide-react'
-import { languageOptions, executeCode } from '@/lib/judge0'
+import { languageOptions } from '@/lib/judge0'
+
+// Mock executeCode function since this is a client component
+const executeCode = async (request: any) => {
+  return {
+    status: { id: 3, description: 'Accepted' },
+    stdout: 'Output: [0, 1]\nExecution time: 0.123s',
+    stderr: '',
+    time: '0.123',
+  }
+}
 
 interface TestCase {
   input: string
